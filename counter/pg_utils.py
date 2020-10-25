@@ -1,5 +1,6 @@
 from functools import wraps
 from psycopg2.extras import DictCursor
+import aiopg
 
 
 class TableName(object):
@@ -67,10 +68,22 @@ def constraint_primary_key(table_name, columns):
 
 
 class PGConnnector(object):
+    def __init__(self, config, loop=None):
+        self.config = config
+        self.pool = None
+        self.loop = loop
+
     def get(self):
-        return None
+        return self.pool
 
     async def connect(self):
+        try:
+            self.pool.close()
+        except Exception:
+            pass
+
+        self.pool = await aiopg.create_pool(loop=self.loop, **self.config)
+
         return True
 
 
