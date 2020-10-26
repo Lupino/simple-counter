@@ -33,11 +33,13 @@ class Column(object):
 def c(column):
     return Column(column)
 
+
 c_all = c('*')
 
 
 def cs(columns):
     return [c(x) for x in columns]
+
 
 cs_all = cs(['*'])
 
@@ -90,13 +92,19 @@ class PGConnnector(object):
 def run_with_pool(cursor_factory=None):
     def decorator(f):
         @wraps(f)
-        async def run(pool, *args, **kwargs):
+        async def run(pool=None, *args, cur=None, **kwargs):
             try:
-                async with pool.get().acquire() as conn:
-                    async with conn.cursor(
-                            cursor_factory=cursor_factory) as cur:
-                        return await f(cur, *args, **kwargs)
+                if cur is None:
+                    async with pool.get().acquire() as conn:
+                        async with conn.cursor(
+                                cursor_factory=cursor_factory) as cur:
+                            return await f(cur, *args, **kwargs)
+                else:
+                    return await f(cur, *args, **kwargs)
             except RuntimeError as e:
+                if cur is not None:
+                    raise e
+
                 err = str(e)
                 if err.find('closing') > -1:
                     connected = await pool.connect()
@@ -188,7 +196,7 @@ def append_update_set(column):
     col = column.column
     if col.find('=') > -1:
         return col
-    return "{} = %s".format(col, col)
+    return "{} = %s".format(col)
 
 
 @run_with_pool()
@@ -321,3 +329,17 @@ def gen_ordering_sql(column, arr):
 
     return 'JOIN (VALUES {}) AS x (id, ordering) ON {} = x.id'.format(
         ', '.join(ret), column.column), 'ORDER BY x.ordering'
+
+
+@run_with_pool()
+async def begin(cur):
+    await cur.execute('BEGIN')
+    return cur
+
+
+async def commit(cur):
+    await cur.execute('COMMIT')
+
+
+async def rollback(cur):
+    await cur.execute('ROLLBACK')
