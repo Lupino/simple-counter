@@ -44,8 +44,14 @@ def cs(columns):
 cs_all = cs(['*'])
 
 
+def column_to_string(column):
+    if isinstance(column, Column):
+        return column.column
+    return column
+
+
 def columns_to_string(columns):
-    return ', '.join([x.column for x in columns])
+    return ', '.join([column_to_string(x) for x in columns])
 
 
 class IndexName(object):
@@ -109,7 +115,7 @@ def run_with_pool(cursor_factory=None):
                 if err.find('closing') > -1:
                     connected = await pool.connect()
                     if connected:
-                        return await run(pool, *args, **kwargs)
+                        return await run(pool, *args, cur=cur, **kwargs)
                     else:
                         raise e
                 else:
@@ -332,9 +338,15 @@ def gen_ordering_sql(column, arr):
 
 
 @run_with_pool()
-async def begin(cur):
+async def transaction(cur, func):
     await cur.execute('BEGIN')
-    return cur
+    try:
+        ret = await func(cur)
+        await commit(cur)
+        return ret
+    except Exception as e:
+        await rollback(cur)
+        raise e
 
 
 async def commit(cur):
