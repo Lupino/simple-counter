@@ -2,6 +2,7 @@ from counter import db
 
 use_db = True
 
+
 def check_equal(a, b, key=None):
     if key is None:
         if a != b:
@@ -21,7 +22,6 @@ def check_big(a, b, key=None):
     else:
         if a[key] <= b[key]:
             raise Exception("Value {} > {}".format(a[key], b[key]))
-
 
 
 async def main():
@@ -48,7 +48,8 @@ async def main():
     check_equal(counter['count'], 8)
 
     hists = await db.get_counter_histories(cid)
-    check_equal(len(hists), 3)
+    total = await db.count_counter_history(cid)
+    check_equal(len(hists), total)
 
     await db.update_counter(cid, name='new name')
     counter = await db.get_counter(cid)
@@ -68,6 +69,9 @@ async def main():
 
     counters = await db.get_counters(uid)
     check_big(len(counters), 0)
+
+    total = await db.count_counter(uid)
+    check_equal(len(counters), total)
 
     for counter in counters:
         await db.remove_counter(counter['id'])

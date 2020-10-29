@@ -75,9 +75,14 @@ async def get_counter_histories(cid, offset=0, size=100, columns=cs_all):
     return await pg_utils.select(_pool,
                                  counter_history,
                                  columns,
+                                 'cid=%s', (cid, ),
                                  offset=offset,
                                  size=size,
                                  other_sql='order by id desc')
+
+
+async def count_counter_history(cid):
+    return await pg_utils.count(_pool, counter_history, "cid=%s", (cid, ))
 
 
 async def create_counter(uid, name, remark):
@@ -143,3 +148,7 @@ async def get_counters(uid, offset=0, size=100, columns=cs_all):
                                  offset=offset,
                                  size=size,
                                  other_sql='order by id desc')
+
+
+async def count_counter(uid):
+    return await pg_utils.count(_pool, counter, 'uid=%s', (uid, ))
