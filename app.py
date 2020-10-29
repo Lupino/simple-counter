@@ -210,7 +210,7 @@ def main():
 
     @app.get('/api/users/me')
     @require_login()
-    def get_user(request, user):
+    async def get_user(request, user):
         return json({'user': user})
 
     @app.listener('after_server_start')
