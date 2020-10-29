@@ -1,4 +1,5 @@
 from counter import db
+from time import sleep
 
 use_db = True
 
@@ -75,3 +76,20 @@ async def main():
 
     for counter in counters:
         await db.remove_counter(counter['id'])
+
+    token = await db.create_token(name, expire_in=2)
+
+    ret = await db.get_name(token)
+    check_equal(ret, name)
+
+    await db.purge_tokens()
+
+    ret = await db.get_name(token)
+    check_equal(ret, name)
+
+    sleep(3)
+
+    await db.purge_tokens()
+
+    ret = await db.get_name(token)
+    check_equal(ret, None)

@@ -3,6 +3,8 @@ from . import pg_utils
 from .pg_utils import t, c, i, cs, cs_all, PGConnnector
 from time import time
 import json
+import hashlib
+from uuid import uuid4
 
 _pool = None
 
@@ -25,6 +27,9 @@ async def close():
 
 counter = t('counters')  # 计数器
 counter_history = t('counter_histories')  # 计数器历史记录
+
+user = t('users')  # 用户表
+token = t('tokens')  # 用户登陆 TOKEN 表
 
 
 async def create_table():
@@ -56,6 +61,28 @@ async def create_table():
 
     await pg_utils.create_index(_pool, False, counter_history, i('cid'),
                                 [c('cid')])
+
+    await pg_utils.create_table(
+        _pool,
+        user,
+        [
+            c("id SERIAL PRIMARY KEY"),
+            c("name VARCHAR(128) NOT NULL"),  # 用户名
+            c("password VARCHAR(128) NOT NULL"),  # 密码
+            c("profile JSON"),  # 用户信息
+            c('created_at INT NOT NULL'),  # 用户添加时间
+        ])
+
+    await pg_utils.create_index(_pool, True, user, i('name'), [c('name')])
+
+    await pg_utils.create_table(_pool, token, [
+        c("token VARCHAR(128) NOT NULL"),
+        c("name VARCHAR(128) NOT NULL"),
+        c("expire_in INT NOT NULL"),
+        c('created_at INT NOT NULL'),
+    ])
+
+    await pg_utils.create_index(_pool, True, token, i('token'), [c('token')])
 
 
 async def create_counter_history(cid, count, reason='', cur=None):
@@ -152,3 +179,53 @@ async def get_counters(uid, offset=0, size=100, columns=cs_all):
 
 async def count_counter(uid):
     return await pg_utils.count(_pool, counter, 'uid=%s', (uid, ))
+
+
+def hash_password(password):
+    h = hashlib.sha256()
+    h.update(bytes(password, 'utf-8'))
+    return h.hexdigest().lower()
+
+
+async def create_user(name, password):
+    now = int(time())
+    return await pg_utils.insert(
+        _pool, user, cs(['name', 'password', 'profile', 'created_at']),
+        (name, hash_password(password), '{}', now), c('id'))
+
+
+async def get_user(id=None, name=None, columns=cs_all):
+    args = ()
+    part_sql = ''
+    if id is not None:
+        args = (id, )
+        part_sql = 'id=%s'
+    if name is not None:
+        args = (name, )
+        part_sql = 'name=%s'
+
+    if not part_sql:
+        raise Exception('id or name is required')
+    return await pg_utils.select_one(_pool, user, columns, part_sql, args)
+
+
+def verify_password(user, password):
+    return user['password'] == hash_password(password)
+
+
+async def create_token(name, expire_in=86400):
+    token_ = uuid4().hex
+    now = int(time())
+    return await pg_utils.insert(
+        _pool, token, cs(['token', 'name', 'expire_in', 'created_at']),
+        (token_, name, expire_in, now), c('token'))
+
+
+async def get_name(token_):
+    return await pg_utils.select_one_only(_pool, token, c('name'), 'token=%s',
+                                          (token_, ))
+
+
+async def purge_tokens():
+    now = int(time())
+    await pg_utils.delete(_pool, token, 'expire_in + created_at < %s', (now, ))
