@@ -9,6 +9,7 @@ COPY requirements.txt /data/requirements.txt
 RUN pip3 config set global.index-url https://mirrors.aliyun.com/pypi/simple/ && pip3 install -r requirements.txt
 
 COPY . /data
+RUN cp config.sample.py config.py
 
 ENTRYPOINT ["python3", "script.py"]
 
