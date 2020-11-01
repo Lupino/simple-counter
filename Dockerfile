@@ -11,6 +11,8 @@ RUN pip3 config set global.index-url https://mirrors.aliyun.com/pypi/simple/ && 
 COPY . /data
 RUN cp config.sample.py config.py
 
+ENV SYSTEM_PYTHON TRUE
+
 ENTRYPOINT ["python3", "script.py"]
 
 CMD ["app.py"]
