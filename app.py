@@ -217,4 +217,4 @@ def main():
     def init(sanic, loop):
         loop.run_until_complete(db.connect(loop))
 
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8080, workers=5)
