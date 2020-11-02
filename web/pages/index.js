@@ -164,7 +164,7 @@ function Home(props) {
                 <AddIcon className={styles['new-counter']} fontSize='large'/>
               </IconButton>
           </div>
-          {counters.map((counter) => <RealCounter counter={counter} user={user} onEdit={() => handleEdit(counter)} onDestory={() => handleDestory(counter)} />)}
+          {counters.map((counter) => <RealCounter counter={counter} user={user} onEdit={() => handleEdit(counter)} onDestory={() => handleDestory(counter)} key={counter.id} />)}
         </div>
         <Dialog
           fullScreen={fullScreen}
