@@ -1,5 +1,5 @@
 import fetchJSON from 'higher-order-helper/fetchJSON';
-import { host } from './config';
+import { host } from '../config';
 import qs from 'querystring';
 import Counter from './counter';
 
@@ -29,7 +29,7 @@ export class User {
   }
 
   async createCounter(name, remark="") {
-    const counter = await this.fetchJSON(`${host}/api/counter/`, { method: 'POST', body: { name, remark } });
+    const counter = await this.fetchJSON(`${host}/api/counters/`, { method: 'POST', body: { name, remark } });
     const realCounter = new Counter(this, counter);
     return realCounter;
   }

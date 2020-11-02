@@ -1,1 +1,1 @@
-const host='http://counter.giveyun.com'
+export const host='http://counter.giveyun.com'

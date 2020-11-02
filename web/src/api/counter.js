@@ -1,4 +1,4 @@
-import { host } from './config';
+import { host } from '../config';
 
 export default class {
   constructor(user, info) {
