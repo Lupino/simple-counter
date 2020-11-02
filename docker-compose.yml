@@ -5,20 +5,36 @@ services:
       context: .
     restart: always
     image: simple-counter:1.0.0
+    volumes:
+    - /etc/timezone:/etc/timezone:ro
+    - /etc/localtime:/etc/localtime:ro
     depends_on:
     - postgres
     ports:
-    - '8080:8080'
+    - '172.17.0.1:8080:8080'
+  purge_token:
+    build:
+      context: .
+    restart: always
+    image: simple-counter:1.0.0
+    volumes:
+    - /etc/timezone:/etc/timezone:ro
+    - /etc/localtime:/etc/localtime:ro
+    depends_on:
+    - postgres
+    command:
+    - scripts/purge_token.py
 
   web:
     build:
       context: web
     restart: always
-    image: simple-counter-web:1.0.0
-    depends_on:
-    - counter
+    image: simple-counter-web:1.0.1
+    volumes:
+    - /etc/timezone:/etc/timezone:ro
+    - /etc/localtime:/etc/localtime:ro
     ports:
-    - ':8081:3000'
+    - '172.17.0.1:8081:3000'
 
   postgres:
     restart: always
@@ -28,3 +44,5 @@ services:
       POSTGRES_PASSWORD: simplecounter
     volumes:
     - ./data/postgres:/var/lib/postgresql/data
+    - /etc/timezone:/etc/timezone:ro
+    - /etc/localtime:/etc/localtime:ro
