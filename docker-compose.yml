@@ -10,6 +10,16 @@ services:
     ports:
     - '8080:8080'
 
+  web:
+    build:
+      context: web
+    restart: always
+    image: simple-counter-web:1.0.0
+    depends_on:
+    - counter
+    ports:
+    - ':8081:3000'
+
   postgres:
     restart: always
     image: postgres:12
