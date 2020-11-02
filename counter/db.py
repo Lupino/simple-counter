@@ -172,6 +172,8 @@ async def get_counters(uid, offset=0, size=100, columns=cs_all):
     return await pg_utils.select(_pool,
                                  counter,
                                  columns,
+                                 'uid=%s',
+                                 (uid, ),
                                  offset=offset,
                                  size=size,
                                  other_sql='order by id desc')
