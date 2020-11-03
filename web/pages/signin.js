@@ -122,4 +122,4 @@ Signin.propTypes = {
   classes: PropTypes.object
 };
 
-export default wrapperApp(withStyles(styles)(Signin));
+export default withStyles(styles)(Signin);

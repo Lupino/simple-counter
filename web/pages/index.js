@@ -209,4 +209,6 @@ function Home(props) {
   )
 }
 
-export default wrapperApp(Home);
+Home.requireLogin = true;
+
+export default Home;
