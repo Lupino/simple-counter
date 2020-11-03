@@ -1,22 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import PropTypes from 'prop-types';
 import Layout from '../components/Layout';
-import wrapperApp from '../components/wrapperApp';
-import { withStyles, useTheme } from '@material-ui/core/styles';
+import {useTheme} from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import Paper from '@material-ui/core/Paper';
 
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
-import {useRouter} from 'next/router';
-import Cookies from 'js-cookie';
-import { signin } from '../src/api/user';
 import Counter from '../src/api/counter';
 import promiseToCallback from 'higher-order-helper/promiseToCallback';
 
@@ -27,7 +21,7 @@ import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
 import Chip from '@material-ui/core/Chip';
 
-import styles from '../styles/Home.module.css'
+import styles from '../styles/Home.module.css';
 
 function RealCounter({user, counter: info, onEdit, onDestory}) {
   const counter = new Counter(user, info);
@@ -44,7 +38,8 @@ function RealCounter({user, counter: info, onEdit, onDestory}) {
         <IconButton aria-label="edit" size="small" onClick={() => onEdit()}>
           <EditIcon fontSize="small" />
         </IconButton>
-        <IconButton aria-label="delete" size="small" onClick={() => onDestory()}>
+        <IconButton aria-label="delete" size="small"
+          onClick={() => onDestory()}>
           <DeleteIcon fontSize="small" />
         </IconButton>
       </div>
@@ -52,15 +47,23 @@ function RealCounter({user, counter: info, onEdit, onDestory}) {
         <IconButton aria-label="remove" onClick={() => updateCount(-1)}>
           <RemoveIcon />
         </IconButton>
-        <Chip label={count} color="primary" className={styles['counter-count']} />
+        <Chip label={count} color="primary"
+          className={styles['counter-count']} />
         <IconButton aria-label="add" onClick={() => updateCount(1)}>
           <AddIcon />
         </IconButton>
       </div>
       <p>{info.remark}</p>
     </div>
-  )
+  );
 }
+
+RealCounter.propTypes = {
+  user: PropTypes.object.required,
+  counter: PropTypes.object.required,
+  onEdit: PropTypes.func,
+  onDestory: PropTypes.func,
+};
 
 
 function Home(props) {
@@ -84,22 +87,22 @@ function Home(props) {
 
   function handleSave() {
     let hasErr = false;
-    let errors = {};
+    const errors = {};
     if (!name) {
       errors.name = '请输入计数器名称';
       hasErr = true;
     }
 
     if (hasErr) {
-      setErrors({ errors });
+      setErrors({errors});
       return;
     }
     function cleanUp() {
       setOpenAddDia(false);
-      setName('')
-      setRemark('')
+      setName('');
+      setRemark('');
       setCid(0);
-      setUpdated(!updated)
+      setUpdated(!updated);
     }
     if (cid > 0) {
       const counter = new Counter(user, {id: cid});
@@ -111,13 +114,14 @@ function Home(props) {
         cleanUp();
       });
     } else {
-      promiseToCallback(user.createCounter.bind(user))(name, remark, (err, counter) => {
-        if (err) {
-          alert('添加失败');
-          return;
-        }
-        cleanUp();
-      });
+      promiseToCallback(user.createCounter.bind(user))(name, remark,
+        (err, counter) => {
+          if (err) {
+            alert('添加失败');
+            return;
+          }
+          cleanUp();
+        });
     }
   }
 
@@ -137,34 +141,41 @@ function Home(props) {
 
   const [counters, setCounters] = useState([]);
   const [offset, setOffset] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [size, setSize] = useState(100);
   const fetchRequestRef = useRef();
 
   function fetchCounters() {
-    promiseToCallback(user.getCounterList.bind(user))({offset, size}, (err, res) => {
-      if (err) {
-        console.log(err)
-      } else {
-        setOffset(res.offset);
-        setCounters(res.counters);
-        setTotal(res.total);
-      }
-    });
+    const id = Date.now();
+    fetchRequestRef.current = id;
+    promiseToCallback(user.getCounterList.bind(user))({offset, size: 10},
+      (err, res) => {
+        if (fetchRequestRef.current !== id) {
+          return;
+        }
+        if (err) {
+          console.log(err);
+        } else {
+          setOffset(res.offset);
+          setCounters(res.counters);
+        }
+      });
   }
 
-  useEffect(fetchCounters, [offset, updated])
+  useEffect(fetchCounters, [offset, updated]);
 
   return (
     <Layout title='计数器' {...props}>
       <main className={styles.main}>
         <div className={styles.grid}>
           <div className={styles.card + ' ' + styles['add-counter']}>
-              <IconButton aria-label="add" size='medium' onClick={() => setOpenAddDia(true)}>
-                <AddIcon className={styles['new-counter']} fontSize='large'/>
-              </IconButton>
+            <IconButton aria-label="add" size='medium'
+              onClick={() => setOpenAddDia(true)}>
+              <AddIcon className={styles['new-counter']} fontSize='large'/>
+            </IconButton>
           </div>
-          {counters.map((counter) => <RealCounter counter={counter} user={user} onEdit={() => handleEdit(counter)} onDestory={() => handleDestory(counter)} key={counter.id} />)}
+          {counters.map((counter) =>
+            <RealCounter counter={counter} user={user}
+              onEdit={() => handleEdit(counter)}
+              onDestory={() => handleDestory(counter)} key={counter.id} />)}
         </div>
         <Dialog
           fullScreen={fullScreen}
@@ -172,7 +183,9 @@ function Home(props) {
           onClose={() => setOpenAddDia(false)}
           aria-labelledby="responsive-dialog-title"
         >
-          <DialogTitle id="responsive-dialog-title">{cid > 0 ? '编辑计数器' : '添加计数器'}</DialogTitle>
+          <DialogTitle id="responsive-dialog-title">
+            {cid > 0 ? '编辑计数器' : '添加计数器'}
+          </DialogTitle>
           <DialogContent>
             <TextField
               autoFocus
@@ -206,9 +219,13 @@ function Home(props) {
         </Dialog>
       </main>
     </Layout>
-  )
+  );
 }
 
 Home.requireLogin = true;
+
+Home.propTypes = {
+  user: PropTypes.object.required,
+};
 
 export default Home;

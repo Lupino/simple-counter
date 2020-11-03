@@ -1,11 +1,11 @@
 import React from 'react';
-import Document, { Html, Head, Main, NextScript } from 'next/document';
-import { ServerStyleSheets } from '@material-ui/core/styles';
+import Document, {Html, Head, Main, NextScript} from 'next/document';
+import {ServerStyleSheets} from '@material-ui/core/styles';
 import createEmotionServer from 'create-emotion-server';
 import theme from '../src/theme';
-import { cache } from './_app.js';
+import {cache} from './_app.js';
 
-const { extractCritical } = createEmotionServer(cache);
+const {extractCritical} = createEmotionServer(cache);
 
 export default class MyDocument extends Document {
   render() {
@@ -49,7 +49,8 @@ MyDocument.getInitialProps = async (ctx) => {
   // 3. app.render
   // 4. page.render
 
-  // Render app and page and get the context of the page with collected side effects.
+  // Render app and page and get the context of the page with collected
+  // side effects.
   const sheets = new ServerStyleSheets();
   const originalRenderPage = ctx.renderPage;
 
@@ -71,7 +72,7 @@ MyDocument.getInitialProps = async (ctx) => {
         key="emotion-style-tag"
         data-emotion-css={styles.ids.join(' ')}
         // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: styles.css }}
+        dangerouslySetInnerHTML={{__html: styles.css}}
       />,
     ],
   };

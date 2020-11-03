@@ -1,14 +1,14 @@
 import fetchJSON from 'higher-order-helper/fetchJSON';
-import { host } from '../config';
-import qs from 'querystring';
+import {host} from '../config';
 import Counter from './counter';
 
-export function signin({ name, password }) {
-  return fetchJSON(`${host}/api/signin/`, { method: 'POST', body: { name, password } });
+export function signin({name, password}) {
+  return fetchJSON(`${host}/api/signin/`,
+    {method: 'POST', body: {name, password}});
 }
 
 export class User {
-  constructor({ token = null, info = null }) {
+  constructor({token = null, info = null}) {
     this.token = token;
     this.info = info;
   }
@@ -28,8 +28,9 @@ export class User {
     return this.info;
   }
 
-  async createCounter(name, remark="") {
-    const counter = await this.fetchJSON(`${host}/api/counters/`, { method: 'POST', body: { name, remark } });
+  async createCounter(name, remark='') {
+    const counter = await this.fetchJSON(`${host}/api/counters/`,
+      {method: 'POST', body: {name, remark}});
     const realCounter = new Counter(this, counter);
     return realCounter;
   }
@@ -38,7 +39,8 @@ export class User {
     const realCounter = new Counter(this, counter);
     return realCounter;
   }
-  async getCounterList({ offset = 0, size = 10 }) {
-    return this.fetchJSON(`${host}/api/counters/?offset=${offset}&size=${size}`);
+  async getCounterList({offset = 0, size = 10}) {
+    const pathname = `${host}/api/counters/`;
+    return this.fetchJSON(`${pathname}?offset=${offset}&size=${size}`);
   }
 }

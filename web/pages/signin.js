@@ -1,18 +1,17 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import Layout from '../components/Layout';
-import wrapperApp from '../components/wrapperApp';
-import { withStyles } from '@material-ui/core/styles';
+import {withStyles} from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 
 import {useRouter} from 'next/router';
 import Cookies from 'js-cookie';
-import { signin } from '../src/api/user';
+import {signin} from '../src/api/user';
 import promiseToCallback from 'higher-order-helper/promiseToCallback';
 
-const styles = theme => ({
+const styles = (theme) => ({
   button: {
     margin: theme.spacing(1),
   },
@@ -36,14 +35,14 @@ const styles = theme => ({
   },
 });
 
-function Signin ({classes, ...props}) {
+function Signin({classes, ...props}) {
   const router = useRouter();
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [errors, setErrors] = useState({});
   const handleSignin = () => {
     let hasErr = false;
-    let errors = {};
+    const errors = {};
     if (!name) {
       errors.name = '请输入用户名/手机号';
       hasErr = true;
@@ -53,22 +52,21 @@ function Signin ({classes, ...props}) {
       hasErr = true;
     }
     if (hasErr) {
-      setErrors({ errors });
+      setErrors({errors});
       return;
     }
     promiseToCallback(signin)({name, password}, (err, info) => {
-      console.log(err, info)
+      console.log(err, info);
       if (err) {
         alert('登录失败!\n用户名或者密码错误!');
         return;
       }
       try {
-
-      Cookies.set('token', info.token);
-      window.localStorage.setItem('userInfo', JSON.stringify(info.user));
-      router.push('/');
+        Cookies.set('token', info.token);
+        window.localStorage.setItem('userInfo', JSON.stringify(info.user));
+        router.push('/');
       } catch (e) {
-        console.log(e)
+        console.log(e);
       }
     });
   };
@@ -111,7 +109,8 @@ function Signin ({classes, ...props}) {
 
           <br />
           <br />
-          <Button variant="contained" color="primary" onClick={handleSignin}>登录</Button>
+          <Button variant="contained" color="primary"
+            onClick={handleSignin}>登录</Button>
         </Paper>
       </div>
     </Layout>
@@ -119,7 +118,7 @@ function Signin ({classes, ...props}) {
 }
 
 Signin.propTypes = {
-  classes: PropTypes.object
+  classes: PropTypes.object,
 };
 
 export default withStyles(styles)(Signin);
